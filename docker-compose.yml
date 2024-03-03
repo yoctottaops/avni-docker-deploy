@@ -88,6 +88,7 @@ services:
     volumes:
       - ./nginx/:/etc/nginx/conf.d/:rw
       - ./certbot/www/:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/nginx/ssl/:ro
     networks:
       - avni
     depends_on:
