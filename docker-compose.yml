@@ -72,7 +72,7 @@ services:
       - --import-realm
       - --proxy
       - edge
-      - --hostname=sso.gyaancenter.com
+      - --hostname=keycloak
       - --https-certificate-file=/opt/jboss/keycloak/domain.crt
       - --https-certificate-key-file=/opt/jboss/keycloak/domain.key
     # command:
