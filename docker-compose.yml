@@ -1,0 +1,97 @@
+version: "3.8"
+services:
+  avni-server:
+    image: avni-server:latest
+    environment:
+      - OPENCHS_SERVER_PORT=8021
+      - OPENCHS_SERVER_OPTS=-Dlogging.file=/var/log/openchs/chs.log -Dlogging.path=/var/log/openchs/ -Dlogging.file.max-size=5mb -Xmx250m -XX:ErrorFile=/var/log/openchs/jvm.log
+      - OPENCHS_DATABASE_HOST=db
+      - OPENCHS_DATABASE=openchs
+      - OPENCHS_DATABASE_USER=openchs
+      - OPENCHS_DATABASE_PASSWORD=openchs
+      - OPENCHS_DATABASE_URL=jdbc:postgresql://db:5432/openchs?currentSchema=public
+      - OPENCHS_USER_POOL=ap-south-1_qEHGuJJOO
+      - OPENCHS_CLIENT_ID=34u3c6q3poij1aphqcn57363mp
+      - OPENCHS_MODE=live
+      - AVNI_IDP_TYPE=keycloak
+      - OPENCHS_SERVER_BUGSNAG_API_KEY=
+      - OPENCHS_BUGSNAG_RELEASE_STAGE=staging
+      - OPENCHS_BUCKET_NAME=staging-user-media
+      - OPENCHS_IAM_USER=staging_app_iam_user
+      - OPENCHS_IAM_USER_ACCESS_KEY=
+      - OPENCHS_IAM_USER_SECRET_ACCESS_KEY=
+      - OPENCHS_KEYCLOAK_CLIENT_SECRET=dsfhdfdsfh323
+      - OPENCHS_KEYCLOAK_SERVER=http://keycloak:8080
+      - OPENCHS_KEYCLOAK_ENABLED=true
+    networks:
+      - avni
+  db:
+    image: postgres:12
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - avni
+  avni-etl:
+    image: avni-etl:latest
+    environment:
+      - OPENCHS_DATABASE=openchs
+      - OPENCHS_DATABASE_USERNAME=openchs
+      - OPENCHS_DATABASE_PASSWORD=openchs
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/openchs
+      - SPRING_DATASOURCE_USERNAME=openchs
+      - SPRING_DATASOURCE_PASSWORD=openchs
+      - SPRING_FLYWAY_ENABLED=false
+      - OPENCHS_KEYCLOAK_SERVER=http://keycloak:8080
+      - AVNI_IDP_TYPE=keycloak
+      - AVNI_SECURITY_ALLOWED_ORIGINS=*
+
+    networks:
+      - avni
+  keycloak:
+    image: quay.io/keycloak/keycloak
+    volumes:
+      - ./imports:/opt/jboss/keycloak/imports
+      - ./domain.crt:/opt/jboss/keycloak/domain.crt
+      - ./domain.key:/opt/jboss/keycloak/domain.key
+    environment:
+      - KEYCLOAK_IMPORT=/opt/jboss/keycloak/imports/on-premise-realm-export.json -Dkeycloak.profile.feature.upload_scripts=enabled
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - DB_VENDOR=postgres
+      - DB_ADDR=db
+      - DB_DATABASE=keycloak
+      - DB_USER=keycloak
+      - DB_PASSWORD=keycloak
+    ports:
+      - "8081:8080"
+      - 8443:8443
+    command:
+      - start
+      - --import-realm
+      - --proxy
+      - edge
+      - --hostname-strict=false
+      - --https-certificate-file=/opt/jboss/keycloak/domain.crt
+      - --https-certificate-key-file=/opt/jboss/keycloak/domain.key
+    # command:
+    #   - "-b 0.0.0.0 -Dkeycloak.import=/opt/jboss/keycloak/imports/on-premise-realm-export.json"
+    networks:
+      - avni
+  avni-nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/:/etc/nginx/conf.d/:rw
+    networks:
+      - avni
+    depends_on:
+      - avni-webapp
+networks:
+  avni:
+    name: avni
