@@ -21,7 +21,7 @@ services:
       - OPENCHS_IAM_USER_ACCESS_KEY=
       - OPENCHS_IAM_USER_SECRET_ACCESS_KEY=
       - OPENCHS_KEYCLOAK_CLIENT_SECRET=dsfhdfdsfh323
-      - OPENCHS_KEYCLOAK_SERVER=http://keycloak:8080
+      - OPENCHS_KEYCLOAK_SERVER=https://sso.gyaancenter.com
       - OPENCHS_KEYCLOAK_ENABLED=true
     networks:
       - avni
@@ -46,7 +46,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=openchs
       - SPRING_DATASOURCE_PASSWORD=openchs
       - SPRING_FLYWAY_ENABLED=false
-      - OPENCHS_KEYCLOAK_SERVER=http://keycloak:8080
+      - OPENCHS_KEYCLOAK_SERVER=https://sso.gyaancenter.com
       - AVNI_IDP_TYPE=keycloak
       - AVNI_SECURITY_ALLOWED_ORIGINS=*
 
@@ -67,15 +67,13 @@ services:
       - DB_DATABASE=keycloak
       - DB_USER=keycloak
       - DB_PASSWORD=keycloak
-    ports:
-      - "8081:8080"
-      - 8443:8443
     command:
       - start
       - --import-realm
       - --proxy
       - edge
       - --hostname-strict=false
+      - --hostname=sso.gyaancenter.com
       - --https-certificate-file=/opt/jboss/keycloak/domain.crt
       - --https-certificate-key-file=/opt/jboss/keycloak/domain.key
     # command:
@@ -88,10 +86,16 @@ services:
       - "80:80"
     volumes:
       - ./nginx/:/etc/nginx/conf.d/:rw
+      - ./certbot/www/:/var/www/certbot/:ro
     networks:
       - avni
     depends_on:
       - avni-webapp
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw
 networks:
   avni:
     name: avni
