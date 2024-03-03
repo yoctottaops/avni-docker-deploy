@@ -95,6 +95,8 @@ services:
       - avni-webapp
   certbot:
     image: certbot/certbot:latest
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    command: "certonly --webroot --webroot-path=/var/www/certbot --agree-tos --force-renewal --email ops@yoctotta.com -d sso.gyaancenter.com -d teachtool.gyaancenter.com"
     volumes:
       - ./certbot/www/:/var/www/certbot/:rw
       - ./certbot/conf/:/etc/letsencrypt/:rw
