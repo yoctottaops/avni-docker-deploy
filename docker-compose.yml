@@ -20,9 +20,13 @@ services:
       - OPENCHS_IAM_USER=staging_app_iam_user
       - OPENCHS_IAM_USER_ACCESS_KEY=
       - OPENCHS_IAM_USER_SECRET_ACCESS_KEY=
-      - OPENCHS_KEYCLOAK_CLIENT_SECRET=dsfhdfdsfh323
+      - OPENCHS_KEYCLOAK_CLIENT_SECRET=dPzeRXzESkVbORgKCHoBIWkjlRvpyqo2
       - OPENCHS_KEYCLOAK_SERVER=https://sso.gyaancenter.com
       - OPENCHS_KEYCLOAK_ENABLED=true
+      - OPENCHS_MINIO_ENABLED=true
+      - OPENCHS_MINIO_URL=http://minio:9000
+      - OPENCHS_MINIO_ACCESS_KEY=minio
+      - OPENCHS_MINIO_SECRET_ACCESS_KEY=minio123
     networks:
       - avni
   db:
@@ -60,8 +64,8 @@ services:
       - ./domain.key:/opt/jboss/keycloak/domain.key
     environment:
       - KEYCLOAK_IMPORT=/opt/jboss/keycloak/imports/on-premise-realm-export.json -Dkeycloak.profile.feature.upload_scripts=enabled
-      - KEYCLOAK_USER=admin
-      - KEYCLOAK_PASSWORD=admin
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
       - DB_VENDOR=postgres
       - DB_ADDR=db
       - DB_DATABASE=keycloak
@@ -72,7 +76,7 @@ services:
       - --import-realm
       - --proxy
       - edge
-      - --hostname=keycloak
+      - --hostname-url=http://keycloak:8443
       - --https-certificate-file=/opt/jboss/keycloak/domain.crt
       - --https-certificate-key-file=/opt/jboss/keycloak/domain.key
     # command:

@@ -29,6 +29,8 @@ CREATE DATABASE openchs;
 
 -- create avni user
 CREATE USER openchs WITH PASSWORD 'openchs' createrole;
+CREATE USER teachap WITH PASSWORD 'teachap' createrole;
+
 
 -- grant all privileges to avni user
 GRANT ALL PRIVILEGES ON DATABASE openchs TO openchs;
@@ -40,9 +42,19 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO openchs;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO openchs;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO openchs;
 
+
+
 CREATE extension "uuid-ossp";
 CREATE extension "ltree";
 CREATE extension "hstore";
+
+create role teachap with NOINHERIT NOLOGIN;
+grant teachap to openchs;
+
+
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO teachap;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO teachap;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO teachap;
 
 create role openchs_impl;
 grant openchs_impl to openchs;
