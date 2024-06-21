@@ -43,7 +43,6 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO openchs;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO openchs;
 
 
-
 CREATE extension "uuid-ossp";
 CREATE extension "ltree";
 CREATE extension "hstore";
@@ -61,3 +60,21 @@ grant openchs_impl to openchs;
 create role organisation_user createrole admin openchs_impl;
 
 
+create DATABASE superset
+    WITH 
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    CONNECTION LIMIT = -1;
+
+-- create superset user
+CREATE USER superset WITH PASSWORD '1qazsxdcfvggdfgfgdf';
+
+-- grant all privileges to superset user
+GRANT ALL PRIVILEGES ON DATABASE superset TO superset;
+
+-- select superset database
+\c superset;
+
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO superset;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO superset;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO superset;

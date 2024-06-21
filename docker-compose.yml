@@ -103,6 +103,19 @@ services:
     volumes:
       - ./certbot/www/:/var/www/certbot/:rw
       - ./certbot/conf/:/etc/letsencrypt/:rw
+  superset:
+    image: apache/superset
+    environment:
+      - SUPERSET_DB_URI=postgresql+psycopg2://postgres:postgres@db/superset
+      - SECRET_KEY=your_secret_key # Change this to a random, secure value
+      - SQLALCHEMY_TRACK_MODIFICATIONS=True
+    volumes:
+      - ./superset_home:/app/superset_home # Persistent volume for Superset configs and SQLite database if you choose not to use Postgres
+    networks:
+      - avni
+    depends_on:
+      - db
+    command: ["bash", "-c", "superset db upgrade && superset init"]
 networks:
   avni:
     name: avni
